@@ -107,11 +107,15 @@ const Drawer = () => {
               <Home />
             </Link>
           )}
-          {show && <Link to={"/admin/home"}>Home</Link>}
+          {show && (
+            <Link to={"/admin/home"} onClick={onClickHandler}>
+              Home
+            </Link>
+          )}
         </LinkBox>
         <LinkBox>
           {!show && (
-            <Link to={"/orders"}>
+            <Link to={"/admin/orders/pending"}>
               <LocalShippingOutlined />
             </Link>
           )}
@@ -147,30 +151,36 @@ const Drawer = () => {
                     gap: "1rem",
                   }}
                 >
-                  <Typography
-                    style={{
-                      margin: "1rem 0",
-                      marginTop: "-0.7rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: ".5rem",
-                    }}
-                  >
-                    <AccessTime style={{ transform: "scale(.8)" }} /> Pending
-                    Orders
-                  </Typography>
-                  <Typography
-                    style={{
-                      margin: "1rem 0",
-                      marginTop: "-0.7rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: ".5rem",
-                    }}
-                  >
-                    <LocalShippingOutlined style={{ transform: "scale(.8)" }} />{" "}
-                    Shipped Orders
-                  </Typography>
+                  <Link to={`/admin/orders/pending`} onClick={onClickHandler}>
+                    <Typography
+                      style={{
+                        margin: "1rem 0",
+                        marginTop: "-0.7rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: ".5rem",
+                      }}
+                    >
+                      <AccessTime style={{ transform: "scale(.8)" }} /> Pending
+                      Orders
+                    </Typography>
+                  </Link>
+                  <Link to={`/admin/orders/shipped`} onClick={onClickHandler}>
+                    <Typography
+                      style={{
+                        margin: "1rem 0",
+                        marginTop: "-0.7rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: ".5rem",
+                      }}
+                    >
+                      <LocalShippingOutlined
+                        style={{ transform: "scale(.8)" }}
+                      />{" "}
+                      Shipped Orders
+                    </Typography>
+                  </Link>
                 </AccordionDetails>
               </Accordion>
             </>

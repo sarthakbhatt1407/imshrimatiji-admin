@@ -17,7 +17,6 @@ const RightDiv = styled.div`
 const ContentDiv = styled.div`
   height: 92vh;
   overflow: auto;
-  padding: 0 1rem;
 `;
 
 const Home = () => {
