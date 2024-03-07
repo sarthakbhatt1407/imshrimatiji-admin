@@ -7,7 +7,8 @@ import PendingOrders from "../components/PendingOrders/PendingOrders";
 import ShippedOrders from "../components/ShippedOrders/ShippedOrders";
 import { Alert, Snackbar } from "@mui/material";
 import CompLoader from "../components/Loaders/CompLoader";
-
+import confirm from "react-alert-confirm";
+import "react-alert-confirm/lib/style.css";
 const MainBox = styled.div`
   display: flex;
 `;
@@ -21,6 +22,11 @@ const RightDiv = styled.div`
 const ContentDiv = styled.div`
   height: 92vh;
   overflow: auto;
+  padding: 0 1rem;
+  background-color: #f5f5f5;
+  h1 {
+    text-transform: capitalize;
+  }
 `;
 const AddModal = styled.div`
   width: 100%;
@@ -97,6 +103,30 @@ const NoOrders = styled.div`
   color: #c0c0c0;
   letter-spacing: 0.09rem;
   text-transform: capitalize;
+`;
+
+const UserOrderBox = styled.div`
+  background-color: white;
+  border-radius: 0.4rem;
+  margin: 1rem 0;
+  padding: 2rem 0;
+`;
+
+const UserInfoDiv = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 1.3rem;
+  justify-content: space-around;
+  width: 60%;
+  max-width: 100%;
+  p {
+    text-transform: capitalize;
+  }
+  i {
+    font-style: normal;
+    color: #c6c6c6;
+    font-size: 1.1rem;
+  }
 `;
 
 const OrdersPage = () => {
@@ -201,29 +231,39 @@ const OrdersPage = () => {
     }
     setIsLoading(false);
   };
+  function handleClickBasic(id) {
+    confirm({
+      title: "Do you want to remove tracking link ?",
+      language: "en",
+      content: <h2> </h2>,
+      onOk: async () => {
+        setIsLoading(true);
+        const res = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/order/tracking-updater`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              orderId: id,
+              action: "remove",
+            }),
+          }
+        );
+        const data = await res.json();
+        console.log(data);
+        if (res.ok) {
+          setRefresher(refersher + 1);
+          setState({ ...state, open: true, text: "Tracking details removed." });
+        }
+        setIsLoading(false);
+      },
+    });
+  }
 
   const trackingLinkRemover = async (id) => {
-    setIsLoading(true);
-    const res = await fetch(
-      `${process.env.REACT_APP_BASE_URL}/order/tracking-updater`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId: id,
-          action: "remove",
-        }),
-      }
-    );
-    const data = await res.json();
-    console.log(data);
-    if (res.ok) {
-      setRefresher(refersher + 1);
-      setState({ ...state, open: true, text: "Tracking details removed." });
-    }
-    setIsLoading(false);
+    handleClickBasic(id);
   };
 
   const handleClick = (newState) => () => {
@@ -239,6 +279,7 @@ const OrdersPage = () => {
       <Drawer />
       <RightDiv>
         <Navbar />
+
         {isLoading && <CompLoader />}
         <Snackbar
           open={open}
@@ -256,7 +297,7 @@ const OrdersPage = () => {
           </Alert>
         </Snackbar>
         <ContentDiv>
-          {" "}
+          <h1>{page} Orders</h1>{" "}
           {showAddModal && (
             <AddModal>
               <AddModalInnerDiv data-aos="zoom-in">
@@ -282,15 +323,26 @@ const OrdersPage = () => {
               {orders.map((obj) => {
                 if (obj.pendingOrders.length > 0) {
                   return (
-                    <>
-                      <p>{obj.userName}</p>
-                      <span>{obj.userEmail}</span>
+                    <UserOrderBox>
+                      <UserInfoDiv>
+                        <p>
+                          <i>Name : </i> {obj.userName}
+                        </p>
+                        <span>
+                          <i>Email : </i>
+                          {obj.userEmail}
+                        </span>
+                        <span>
+                          <i>User id : </i>
+                          {obj.userId}
+                        </span>
+                      </UserInfoDiv>
                       <PendingOrders
                         orders={obj.pendingOrders}
                         page={currentPage}
                         showAddModalHandler={showAddModalHandler}
                       />
-                    </>
+                    </UserOrderBox>
                   );
                 }
                 return <></>;
@@ -303,16 +355,27 @@ const OrdersPage = () => {
               {orders.map((obj) => {
                 if (obj.shippedOrders.length > 0) {
                   return (
-                    <>
-                      <p>{obj.userName}</p>
-                      <span>{obj.userEmail}</span>
+                    <UserOrderBox>
+                      <UserInfoDiv>
+                        <p>
+                          <i>Name : </i> {obj.userName}
+                        </p>
+                        <span>
+                          <i>Email : </i>
+                          {obj.userEmail}
+                        </span>
+                        <span>
+                          <i>User id : </i>
+                          {obj.userId}
+                        </span>
+                      </UserInfoDiv>
                       <ShippedOrders
                         orders={obj.shippedOrders}
                         page={currentPage}
                         showAddModalHandler={showAddModalHandler}
                         trackingLinkRemover={trackingLinkRemover}
                       />
-                    </>
+                    </UserOrderBox>
                   );
                 }
                 return <></>;

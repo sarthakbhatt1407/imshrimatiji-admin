@@ -187,7 +187,11 @@ const Drawer = () => {
           )}
         </LinkBox>
         <LinkBox>
-          {!show && <Inventory2Outlined />}
+          {!show && (
+            <Link to={"/admin/products/add-new"}>
+              <Inventory2Outlined />
+            </Link>
+          )}
           {show && (
             <>
               <Accordion
@@ -220,17 +224,19 @@ const Drawer = () => {
                     gap: "1rem",
                   }}
                 >
-                  <Typography
-                    style={{
-                      margin: "1rem 0",
-                      marginTop: "-0.7rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: ".rem",
-                    }}
-                  >
-                    Add New Product
-                  </Typography>
+                  <Link to={"/admin/products/add-new"}>
+                    <Typography
+                      style={{
+                        margin: "1rem 0",
+                        marginTop: "-0.7rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: ".rem",
+                      }}
+                    >
+                      Add New Product
+                    </Typography>
+                  </Link>
                   <Typography
                     style={{
                       margin: "1rem 0",

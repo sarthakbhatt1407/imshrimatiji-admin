@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import OrdersPage from "./pages/OrdersPage";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import Products from "./Products";
 const App = () => {
   useEffect(() => {
     AOS.init({
@@ -19,6 +20,7 @@ const App = () => {
       <Routes>
         <Route path="/admin/home" element={<Home />} exact />
         <Route path="/admin/orders/:page" element={<OrdersPage />} exact />
+        <Route path="/admin/products/:page" element={<Products />} exact />
         <Route path="*" element={<Home />} />
       </Routes>
     </>

@@ -110,6 +110,26 @@ const NoItemsFoundBox = styled.div`
   }
 `;
 
+const ActionButton = styled.button`
+  background-color: white;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  margin: 0 0.2rem;
+  cursor: pointer;
+  &:hover {
+    border: 1px solid #3d3d3d77e;
+    transform: translateY(-1px);
+    box-shadow: 0.1rem 0.1rem 0.5rem #919191;
+  }
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const Orders = (props) => {
   const { orders, page, showAddModalHandler, trackingLinkRemover } = props;
   const showAddModalHandlerCLick = (e) => {
@@ -177,28 +197,31 @@ const Orders = (props) => {
                     textWrap: "wrap",
                   }}
                 >
-                  {item.addressLine1}, {item.addressLine2}, {item.city} -{" "}
-                  {item.cityPincode}, {item.addressState}
+                  {item.addressLine1}, {item.addressLine2}, {item.contactNum},{" "}
+                  {item.city} - {item.cityPincode}, {item.addressState}
                 </td>
                 <td>{item.paymentOrderId.toLowerCase()}</td>
                 {page === "pending" && (
                   <td>
-                    <button id={item._id} onClick={showAddModalHandlerCLick}>
+                    <ActionButton
+                      id={item._id}
+                      onClick={showAddModalHandlerCLick}
+                    >
                       &#43;
-                    </button>
+                    </ActionButton>
                   </td>
                 )}
                 {page === "shipped" && (
                   <td>
-                    <button
+                    <ActionButton
                       id={item._id}
                       onClick={(e) => {
                         showAddModalHandler(e, "edit", item.tracking);
                       }}
                     >
                       &#9998;
-                    </button>
-                    <button
+                    </ActionButton>
+                    <ActionButton
                       id={item._id}
                       onClick={(e) => {
                         console.log(e.target.id);
@@ -206,7 +229,7 @@ const Orders = (props) => {
                       }}
                     >
                       &#x1F5D1;
-                    </button>
+                    </ActionButton>
                   </td>
                 )}
               </tr>
