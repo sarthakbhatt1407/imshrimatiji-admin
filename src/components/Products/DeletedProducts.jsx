@@ -1,14 +1,164 @@
-import { Alert, Snackbar } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
+import confirm from "react-alert-confirm";
+import "react-alert-confirm/lib/style.css";
 import CompLoader from "../Loaders/CompLoader";
-
 const MainBox = styled.div`
   padding: 1rem 2rem;
   height: 93vh;
   position: relative;
 `;
 
+const InnerBox = styled.div`
+  width: 98%;
+  border-radius: 0.4rem;
+  background-color: white;
+  gap: 1rem;
+  padding: 1rem;
+  margin: 0 auto;
+  position: relative;
+`;
+const ProductsTable = styled.table`
+  height: fit-content;
+  width: 100%;
+  text-align: center;
+  thead {
+    background-color: #f1f2f2;
+    tr {
+      td {
+        padding: 0.4rem 1rem;
+        color: #5e5e5e;
+        text-transform: capitalize;
+        font-size: 0.9rem;
+        font-weight: bold;
+        &:first-child {
+          text-align: center;
+        }
+        @media only screen and (max-width: 1220px) {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+  tbody {
+    tr {
+      td {
+        padding: 0.8rem 1rem;
+
+        font-size: 1rem;
+        color: #4f4f4f;
+        border-bottom: 1px solid #f2f2f2;
+        a {
+          color: black;
+          text-decoration: none;
+        }
+      }
+    }
+  }
+`;
+
+const ProductImgTextBox = styled.div`
+  margin: auto;
+  width: 80%;
+  display: flex;
+  align-items: center;
+  color: #4f4f4f;
+  gap: 1rem;
+  div {
+    font-size: 1rem;
+    p {
+      font-size: 0.9rem;
+    }
+  }
+  img {
+    width: 5rem;
+    border-radius: 0.3rem;
+    display: inline;
+    margin-right: 0.8rem;
+  }
+  p {
+    text-transform: capitalize;
+    display: inline;
+    font-size: 1.2rem;
+    font-weight: bold;
+    div {
+      span {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  @media only screen and (max-width: 1220px) {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
+
+    p {
+      font-size: 1.25rem;
+    }
+    img {
+      width: 7rem;
+      margin-right: 0;
+    }
+  }
+`;
+
+const NoItemsFoundBox = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-color: #f7f5f5; */
+  height: 30vh;
+  p {
+    color: #a6a6a6b7;
+    font-size: 1.7rem;
+    letter-spacing: 0.2rem;
+  }
+`;
+
+const ActionButton = styled.button`
+  background-color: white;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  margin: 0 0.2rem;
+  cursor: pointer;
+  &:hover {
+    border: 1px solid #3d3d3d77e;
+    transform: translateY(-1px);
+    box-shadow: 0.1rem 0.1rem 0.5rem #919191;
+  }
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const Modal = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 98%;
+  /* height: 100%; */
+  background-color: #00000038;
+  border-radius: 0.4rem;
+  padding: 1rem;
+`;
+
+const ModalInnerDiv = styled.div`
+  width: 98%;
+  height: 98%;
+  margin: auto;
+  background-color: white;
+  border-radius: 0.4rem;
+`;
 const FormBox = styled.div`
   display: grid;
   width: 98%;
@@ -128,6 +278,8 @@ const BtnDiv = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 1rem;
+
   button {
     background-color: #3d9cfb;
     color: white;
@@ -136,12 +288,37 @@ const BtnDiv = styled.div`
     border-radius: 0.4rem;
     text-transform: uppercase;
     font-weight: bold;
+    cursor: pointer;
     letter-spacing: 0.09rem;
   }
 `;
 
-const AddProduct = () => {
-  const defulatFields = {
+const DeletedProducts = () => {
+  const [products, setProducts] = useState([]);
+  const [refresher, setRefresher] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const fetcher = async () => {
+    const resProducts = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/product/all-items`
+    );
+    const dataProducts = await resProducts.json();
+    // console.log(dataProducts.products);
+    setProducts(dataProducts.products);
+  };
+
+  useEffect(() => {
+    fetcher();
+    const intv = setInterval(() => {
+      if (showModal) {
+        allFieldChecker();
+      }
+    }, 1000);
+    return () => {
+      clearInterval(intv);
+    };
+  }, [refresher, showModal]);
+
+  const [defulatFields, setDefaultField] = useState({
     title: "",
     desc: "",
     category: "saree",
@@ -154,7 +331,7 @@ const AddProduct = () => {
     metaKeywords: "",
     color: "",
     stock: [{ xxl: 0 }, { xl: 0 }, { l: 0 }, { m: 0 }, { s: 0 }],
-  };
+  });
 
   const [titleErr, setTitleErr] = useState(false);
   const [descErr, setDescErr] = useState(false);
@@ -232,16 +409,6 @@ const AddProduct = () => {
     setAllFieldValid(true);
   };
 
-  useEffect(() => {
-    const intv = setInterval(() => {
-      allFieldChecker();
-    }, 500);
-
-    return () => {
-      clearInterval(intv);
-    };
-  }, []);
-
   const onChangeHandler = (e) => {
     setAllFieldValid(false);
     const id = e.target.id;
@@ -304,6 +471,7 @@ const AddProduct = () => {
         }
         return obj;
       });
+      console.log(updatedStock);
       setInpFields({ ...inpField, stock: updatedStock });
       return;
     }
@@ -344,6 +512,7 @@ const AddProduct = () => {
       const updatedStock = inpField.stock.map((obj) => {
         for (const key in obj) {
           if (key === id) {
+            console.log(obj);
             obj[key] = Number(val);
           }
         }
@@ -457,6 +626,8 @@ const AddProduct = () => {
   };
 
   const click = async () => {
+    // console.log(inpField);
+    // return;
     const ele = document.querySelector("#img");
     if (images.length < 1) {
       setImgErr(true);
@@ -466,6 +637,7 @@ const AddProduct = () => {
     setIsLoading(true);
     const formData = new FormData();
     formData.append("title", inpField.title);
+    formData.append("id", inpField.id);
     formData.append("desc", inpField.desc);
     formData.append("category", inpField.category);
     formData.append("price", inpField.price);
@@ -482,9 +654,9 @@ const AddProduct = () => {
     }
 
     const res = await fetch(
-      `${process.env.REACT_APP_BASE_URL}/product/create-new-product`,
+      `${process.env.REACT_APP_BASE_URL}/product/edit-item`,
       {
-        method: "POST",
+        method: "PATCH",
         body: formData,
       }
     );
@@ -494,6 +666,7 @@ const AddProduct = () => {
       setState({ ...state, open: true, text: "Product Added." });
       setInpFields(defulatFields);
       setImages([]);
+      setShowModal(false);
     } else {
       setState({ ...state, open: true, text: "Unable to add product." });
       setErr(true);
@@ -506,277 +679,111 @@ const AddProduct = () => {
   const handleClose = () => {
     setState({ ...state, open: false });
   };
+  function handleClickBasic(id) {
+    confirm({
+      title: "Do you want to restore product ?",
+      language: "en",
+      content: <h2> </h2>,
+      onOk: async () => {
+        const res = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/product/delete-restore`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: id,
+              action: "restore",
+            }),
+          }
+        );
+        const data = await res.json();
+        console.log(data);
+        if (res.ok) {
+          setRefresher(refresher + 1);
+        }
+      },
+    });
+  }
 
   return (
     <MainBox>
-      {err && (
-        <Snackbar
-          open={open}
-          anchorOrigin={{ vertical, horizontal }}
-          autoHideDuration={3000}
-          onClose={handleClose}
-        >
-          <Alert
-            severity="error"
-            onClose={handleClose}
-            variant="filled"
-            sx={{ width: "100%", top: 0, fontSize: ".9rem" }}
-          >
-            {text}
-          </Alert>
-        </Snackbar>
-      )}
-      {!err && (
-        <Snackbar
-          open={open}
-          anchorOrigin={{ vertical, horizontal }}
-          autoHideDuration={3000}
-          onClose={handleClose}
-        >
-          <Alert
-            onClose={handleClose}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%", top: 0, fontSize: ".9rem" }}
-          >
-            {text}
-          </Alert>
-        </Snackbar>
-      )}
-      <FormBox>
-        {isLoading && <CompLoader />}
-        <LabelInpBox>
-          <Label htmlFor="title">Product Title</Label>
-          <Input
-            type="text"
-            name="title"
-            id="title"
-            placeholder="enter title"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.title}
-          />
-          {titleErr && <span data-aos="fade-in">Invalid title</span>}
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="desc">Description</Label>
-          <Input
-            type="text"
-            name="desc"
-            id="desc"
-            placeholder="enter description"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.desc}
-          />
-          {descErr && (
-            <span data-aos="fade-in">
-              Description is too short (Req. length is 30 characters).
-            </span>
-          )}
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="category">product category</Label>
-          {/* <Input
-            required
-            type="text"
-            name="category"
-            id="category"
-            placeholder="enter category"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.category}
-          /> */}
-          <Select name="category" id="category" onChange={onChangeHandler}>
-            <Option value={"saree"}>saree</Option>;
-            <Option value={"kurti"}>kurti</Option>;
-            <Option value={"frock"}>frock</Option>;
-            <Option value={"suit"}>suit</Option>;
-          </Select>
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="price">Price</Label>
-          <Input
-            type="number"
-            name="price"
-            id="price"
-            placeholder="enter price"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.price}
-          />
-          {priceErr && <span data-aos="fade-in">Invalid price</span>}
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="color">Color</Label>
-          <Input
-            type="text"
-            name="color"
-            id="color"
-            placeholder="enter color (ex. red, green or hex code)"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.color}
-          />
-          {colorErr && <span data-aos="fade-in">Invalid color</span>}
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="fabric">fabric</Label>
-          <Input
-            type="text"
-            name="fabric"
-            id="fabric"
-            placeholder="enter fabric"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.fabric}
-          />
-          {fabricErr && <span data-aos="fade-in">Invalid fabric</span>}
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="discount">discount(%)</Label>
-          <Input
-            type="number"
-            name="discount"
-            id="discount"
-            placeholder="enter discount (Ex. 0, 5, 10, 15)"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.discount}
-          />
-          {discountErr && <span data-aos="fade-in">Invalid discount</span>}
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="">Meta title</Label>
-          <Input
-            type="text"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.metaTitle}
-            disabled
-          />
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="">Slug url</Label>
-          <Input
-            type="text"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.slug}
-            disabled
-          />
-        </LabelInpBox>
-        <LabelInpBox>
-          <Label htmlFor="">Meta Desc</Label>
-          <Input
-            type="text"
-            onChange={onChangeHandler}
-            onBlur={onBlurHandler}
-            value={inpField.metaDesc}
-            disabled
-          />
-        </LabelInpBox>
-        <div></div>
-        <div></div>
-        <Table>
+      <InnerBox>
+        <ProductsTable>
           <thead>
             <tr>
-              <td>Size</td>
+              <td>Product</td>
+              <td>Price</td>
+              <td>Category</td>
+              <td>Color</td>
               <td>Stock</td>
+              <td>Added on</td>
+              <td>Action</td>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>S</td>
-              <td style={{ display: "flex", flexDirection: "column" }}>
-                <Input
-                  type="number"
-                  id="s"
-                  onChange={onChangeHandler}
-                  onBlur={onBlurHandler}
-                />
-                {smallErr && <span data-aos="fade-in">Invalid number</span>}
-              </td>
-            </tr>
-            <tr>
-              <td>M</td>
-              <td style={{ display: "flex", flexDirection: "column" }}>
-                <Input
-                  type="number"
-                  id="m"
-                  onChange={onChangeHandler}
-                  onBlur={onBlurHandler}
-                />
-                {mediumErr && <span data-aos="fade-in">Invalid number</span>}
-              </td>
-            </tr>
-            <tr>
-              <td>L</td>
-              <td style={{ display: "flex", flexDirection: "column" }}>
-                <Input
-                  type="number"
-                  id="l"
-                  onChange={onChangeHandler}
-                  onBlur={onBlurHandler}
-                />
-                {lErr && <span data-aos="fade-in">Invalid number</span>}
-              </td>
-            </tr>
-            <tr>
-              <td>XL</td>
-              <td style={{ display: "flex", flexDirection: "column" }}>
-                <Input
-                  type="number"
-                  id="xl"
-                  onChange={onChangeHandler}
-                  onBlur={onBlurHandler}
-                />
-                {xlErr && <span data-aos="fade-in">Invalid number</span>}
-              </td>
-            </tr>
-            <tr>
-              <td>XXL</td>
-              <td style={{ display: "flex", flexDirection: "column" }}>
-                <Input
-                  type="number"
-                  id="xxl"
-                  onChange={onChangeHandler}
-                  onBlur={onBlurHandler}
-                />
-                {xxlErr && <span data-aos="fade-in">Invalid number</span>}
-              </td>
-            </tr>
+            {products.length > 0 &&
+              products.map((item) => {
+                if (item.status != false) {
+                  return <></>;
+                }
+                return (
+                  <tr key={item.id + Math.random() * 20}>
+                    <td>
+                      <Link
+                        to={`${process.env.REACT_APP_DEPLOYED_FRONTEND_URL}/product/${item.category}/${item.slug}/${item.id}`}
+                      >
+                        <ProductImgTextBox>
+                          <img src={item.images.split(" ")[0]} alt="" />
+                          <p>
+                            <div>
+                              <span>{item.title} </span>
+                            </div>
+                          </p>
+                        </ProductImgTextBox>
+                      </Link>
+                    </td>
+                    <td>₹ {Number(item.price).toLocaleString("en-IN")}</td>
+                    <td>{item.category}</td>
+                    <td>{item.color}</td>
+                    <td>
+                      {item.stock.map((size) => {
+                        for (const key in size) {
+                          return (
+                            <span>
+                              {key.toUpperCase()} : {size[key]} <br />
+                            </span>
+                          );
+                        }
+                      })}
+                    </td>
+                    <td>
+                      {item.date} <br /> {item.time}
+                    </td>{" "}
+                    <td>
+                      <ActionButton
+                        id={item.id}
+                        onClick={(e) => {
+                          handleClickBasic(e.target.id);
+                        }}
+                      >
+                        &#x21bb;
+                      </ActionButton>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
-        </Table>
-        <LabelInpBox>
-          <Label htmlFor="">Product Images</Label>
-          <Input type="file" name="" id="img" multiple onChange={imgHanlder} />
-          {imgErr && <span data-aos="fade-in">Select images.</span>}
-          <ImgBox id="imgbox"></ImgBox>
-        </LabelInpBox>
-        <div></div>
-        <div></div>
-        <BtnDiv>
-          {allFieldValid && <button onClick={click}>Submit</button>}
-          {!allFieldValid && (
-            <button
-              disabled
-              style={{ backgroundColor: "#eaeaea" }}
-              onClick={() => {
-                console.log(inpField);
-              }}
-            >
-              Submit
-            </button>
-          )}
-        </BtnDiv>
-      </FormBox>{" "}
+        </ProductsTable>
+        {products.length === 0 && (
+          <NoItemsFoundBox>
+            <p>No orders found!</p>
+          </NoItemsFoundBox>
+        )}
+      </InnerBox>
     </MainBox>
-    // <div>
-    //   {/* <input type="file" name="" id="img" multiple onChange={onChangeHandler} />
-    //   <button onClick={click}>submit</button> */}
-    // </div>
   );
 };
 
-export default AddProduct;
+export default DeletedProducts;

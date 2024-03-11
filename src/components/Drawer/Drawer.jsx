@@ -224,7 +224,7 @@ const Drawer = () => {
                     gap: "1rem",
                   }}
                 >
-                  <Link to={"/admin/products/add-new"}>
+                  <Link to={"/admin/products/add-new"} onClick={onClickHandler}>
                     <Typography
                       style={{
                         margin: "1rem 0",
@@ -237,28 +237,40 @@ const Drawer = () => {
                       Add New Product
                     </Typography>
                   </Link>
-                  <Typography
-                    style={{
-                      margin: "1rem 0",
-                      marginTop: "-0.7rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: ".5rem",
-                    }}
+
+                  <Link
+                    to={"/admin/products/edit-products"}
+                    onClick={onClickHandler}
                   >
-                    Edit / Delete
-                  </Typography>
-                  <Typography
-                    style={{
-                      margin: "1rem 0",
-                      marginTop: "-0.7rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: ".5rem",
-                    }}
+                    <Typography
+                      style={{
+                        margin: "1rem 0",
+                        marginTop: "-0.7rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: ".5rem",
+                      }}
+                    >
+                      Edit / Delete
+                    </Typography>
+                  </Link>
+
+                  <Link
+                    to={"/admin/products/deleted-products"}
+                    onClick={onClickHandler}
                   >
-                    Deleted
-                  </Typography>
+                    <Typography
+                      style={{
+                        margin: "1rem 0",
+                        marginTop: "-0.7rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: ".5rem",
+                      }}
+                    >
+                      Deleted
+                    </Typography>
+                  </Link>
                 </AccordionDetails>
               </Accordion>
             </>

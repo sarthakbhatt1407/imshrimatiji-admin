@@ -8,7 +8,6 @@ const MainBox = styled.div`
 
 const PendingOrders = (props) => {
   const { orders, page, showAddModalHandler } = props;
-  console.log(orders);
 
   return (
     <MainBox>

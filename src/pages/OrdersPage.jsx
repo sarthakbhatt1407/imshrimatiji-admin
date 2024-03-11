@@ -140,6 +140,8 @@ const OrdersPage = () => {
   const [refersher, setRefresher] = useState(0);
   const [pendingOrd, setPendingOrd] = useState(true);
   const [shippedOrd, setShippedOrd] = useState(true);
+  const [err, setErr] = useState(false);
+  const [errTxt, setErrTxt] = useState("");
   const [state, setState] = React.useState({
     open: false,
     vertical: "top",
@@ -228,6 +230,15 @@ const OrdersPage = () => {
       setRefresher(refersher + 1);
       setShowAddModal(!showAddModal);
       setState({ ...state, open: true, text: "Tracking details added." });
+    } else {
+      setShowAddModal(!showAddModal);
+      setErr(true);
+      setErrTxt("Unable to add.");
+      setState({ ...state, open: true });
+      setTimeout(() => {
+        setErr(false);
+        setErrTxt("");
+      }, 4000);
     }
     setIsLoading(false);
   };
@@ -256,6 +267,14 @@ const OrdersPage = () => {
         if (res.ok) {
           setRefresher(refersher + 1);
           setState({ ...state, open: true, text: "Tracking details removed." });
+        } else {
+          setErr(true);
+          setErrTxt("Unable to delete.");
+          setState({ ...state, open: true });
+          setTimeout(() => {
+            setErr(false);
+            setErrTxt("");
+          }, 4000);
         }
         setIsLoading(false);
       },
@@ -264,10 +283,6 @@ const OrdersPage = () => {
 
   const trackingLinkRemover = async (id) => {
     handleClickBasic(id);
-  };
-
-  const handleClick = (newState) => () => {
-    setState({ ...newState, open: true });
   };
 
   const handleClose = () => {
@@ -281,21 +296,41 @@ const OrdersPage = () => {
         <Navbar />
 
         {isLoading && <CompLoader />}
-        <Snackbar
-          open={open}
-          anchorOrigin={{ vertical, horizontal }}
-          autoHideDuration={3000}
-          onClose={handleClose}
-        >
-          <Alert
+        {err && (
+          <Snackbar
+            open={open}
+            anchorOrigin={{ vertical, horizontal }}
+            autoHideDuration={3000}
             onClose={handleClose}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%", top: 0, fontSize: ".9rem" }}
           >
-            {text}
-          </Alert>
-        </Snackbar>
+            <Alert
+              severity="error"
+              onClose={handleClose}
+              variant="filled"
+              sx={{ width: "100%", top: 0, fontSize: ".9rem" }}
+            >
+              {errTxt}
+            </Alert>
+          </Snackbar>
+        )}
+
+        {!err && (
+          <Snackbar
+            open={open}
+            anchorOrigin={{ vertical, horizontal }}
+            autoHideDuration={3000}
+            onClose={handleClose}
+          >
+            <Alert
+              onClose={handleClose}
+              severity="success"
+              variant="filled"
+              sx={{ width: "100%", top: 0, fontSize: ".9rem" }}
+            >
+              {text}
+            </Alert>
+          </Snackbar>
+        )}
         <ContentDiv>
           <h1>{page} Orders</h1>{" "}
           {showAddModal && (
