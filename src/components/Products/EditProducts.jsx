@@ -930,7 +930,7 @@ const EditProducts = () => {
               <td>Color</td>
               <td>Stock</td>
               <td>Added on</td>
-              <td>Action</td>
+              <td>Edit/Delete</td>
             </tr>
           </thead>
           <tbody>

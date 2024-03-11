@@ -719,7 +719,7 @@ const DeletedProducts = () => {
               <td>Color</td>
               <td>Stock</td>
               <td>Added on</td>
-              <td>Action</td>
+              <td>Restore</td>
             </tr>
           </thead>
           <tbody>

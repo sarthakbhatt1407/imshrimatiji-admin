@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import logo from "../../assests/images/logo.png";
 import Box from "@mui/material/Box";
@@ -12,7 +12,13 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import Logout from "@mui/icons-material/Logout";
 import { Badge } from "@mui/material";
-import { Inventory2Outlined, MailOutline } from "@mui/icons-material";
+import {
+  AccessTime,
+  Inventory2Outlined,
+  MailOutline,
+} from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 
 const MainBox = styled.div`
   width: 100%;
@@ -40,13 +46,46 @@ const ProfileDiv = styled.div`
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const dispatch = useDispatch();
   const open = Boolean(anchorEl);
+  const [pendingOrd, setPendingOrd] = useState([]);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const orderFethcer = async () => {
+    const res = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/order/order-counter`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      }
+    );
+    const data = await res.json();
+    if (res.ok) {
+      const arr = data.totalOrders.filter((ord) => {
+        return ord.status === "pending";
+      });
+      setPendingOrd(arr);
+    }
+  };
+
+  useEffect(() => {
+    orderFethcer();
+    const intv = setInterval(() => {
+      orderFethcer();
+    }, 1000);
+    return () => {
+      clearInterval(intv);
+    };
+  }, []);
+
   return (
     <MainBox>
       <ImgDiv>
@@ -67,14 +106,20 @@ const Navbar = () => {
                 <MailOutline style={{ color: "#1976D2", cursor: "pointer" }} />
               </Badge>
             </Typography>
-            <Typography sx={{ minWidth: 50 }}>
-              <Badge badgeContent={4} color="success" max={999}>
-                <Inventory2Outlined
-                  style={{ color: "#1976D2", cursor: "pointer" }}
-                  color="action"
-                />
-              </Badge>
-            </Typography>
+            <Link to={"/admin/orders/pending"}>
+              <Typography sx={{ minWidth: 50 }}>
+                <Badge
+                  badgeContent={pendingOrd ? pendingOrd.length : 0}
+                  color="success"
+                  max={999}
+                >
+                  <AccessTime
+                    style={{ color: "#1976D2", cursor: "pointer" }}
+                    color="action"
+                  />
+                </Badge>
+              </Typography>
+            </Link>
             <Tooltip title="Account settings">
               <IconButton
                 onClick={handleClick}
@@ -133,7 +178,11 @@ const Navbar = () => {
             </MenuItem>
             <Divider />
 
-            <MenuItem onClick={handleClose}>
+            <MenuItem
+              onClick={() => {
+                dispatch({ type: "logout" });
+              }}
+            >
               <ListItemIcon>
                 <Logout fontSize="small" />
               </ListItemIcon>

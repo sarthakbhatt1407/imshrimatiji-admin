@@ -4,6 +4,7 @@ import {
   Home,
   Inventory2Outlined,
   LocalShippingOutlined,
+  PeopleAltOutlined,
 } from "@mui/icons-material";
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -274,6 +275,18 @@ const Drawer = () => {
                 </AccordionDetails>
               </Accordion>
             </>
+          )}
+        </LinkBox>{" "}
+        <LinkBox>
+          {!show && (
+            <Link to={"/admin/all-users"}>
+              <PeopleAltOutlined />
+            </Link>
+          )}
+          {show && (
+            <Link to={"/admin/all-users"} onClick={onClickHandler}>
+              Users
+            </Link>
           )}
         </LinkBox>
       </AllLinksBox>
